@@ -1,0 +1,43 @@
+<launch>
+
+
+  <!-- Laste opp empty world -->
+  <arg name="paused" default="true"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="headless" value="$(arg headless)"/>
+  </include>
+
+
+  <!-- Spawne modeller -->
+  <param name="robot_description" command="$(find xacro)/xacro.py $(find simuleringer)/urdf/bordetFlipped.urdf.xacro" />
+  <param name="robot_description2" command="$(find xacro)/xacro.py $(find simuleringer)/urdf/puck.urdf.xacro" />
+
+  <arg name="init_pose" value="-x 0 -y 0 -z 0" />
+  <arg name="init_pose2" value="-x 0 -y 0.8 -z 0.2" />
+
+  <node name="spawn_minibot_model" pkg="gazebo_ros" type="spawn_model"
+     args="$(arg init_pose) -urdf -param /robot_description -model gazebo1"
+     respawn="false" output="screen" />
+
+  <node name="spawn_minibot_model2" pkg="gazebo_ros" type="spawn_model"
+    args="$(arg init_pose2) -urdf -param /robot_description2 -model gazebo2"
+    respawn="false" output="screen" />
+   
+
+    <!-- Styring for kontrollerne -->
+  <rosparam command="load" file="$(find simuleringer)/config/sliderEffortPositions.yaml"/>
+
+  <node name="posisjonsKontroller" pkg="controller_manager" type="spawner"
+    args="slider_controller_pos"/>    
+
+
+</launch>
