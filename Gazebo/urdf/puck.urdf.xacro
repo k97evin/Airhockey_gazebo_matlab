@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<robot name="gazebo2" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:property name="rpy_default" value="0 0 0" />
+  <xacro:property name="xyz_default" value="0 0 0" />
+    <xacro:property name="puckR" value="0.04" />
+  <xacro:property name="puckL" value="0.008" />
+
+  <xacro:macro name="sylinder" params ="navn r l xyz:={xyz_default} rpy:=${rpy_default} mass:=10 farge:=Gazebo/White">
+    <link name="${navn}">
+      <visual>
+        <geometry>
+          <cylinder radius="${r}" length="${l}"/>
+        </geometry>
+        <origin rpy="${rpy}" xyz="${xyz}"/>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder radius="${r}" length="${l}"/>
+        </geometry>
+        <origin rpy="${rpy}" xyz="${xyz}"/>
+        <surface>
+          <bounce restitution_coefficient="0.5" threshold="0"/>
+        </surface>
+        <contact>
+          <ode>
+             <max_vel>30</max_vel>
+          </ode>
+        </contact>
+      </collision>
+        <inertial>
+        	<mass value="${mass}" />
+        	<inertia ixx="${mass*(3*r*r+l*l)/6}" ixy="0.0" ixz="0.0" iyy="${mass*(3*r*r+l*l)/6}" iyz="0.0" izz="${mass*r*r}" />
+          <origin rpy="${rpy}" xyz="${xyz}"/>
+
+        </inertial>
+    </link>
+
+    <gazebo reference="${navn}">
+      <mu1 value="0.0008" />
+      <mu2 value="0.0008" />
+      **<maxVel value="30.0"/>**
+      <kp value="300.0" />
+      <kd value="0.01" />
+      <turnGravityOff>false</turnGravityOff>
+      <material>${farge}</material>
+    </gazebo>
+  </xacro:macro>  
+
+  <xacro:sylinder navn="puck" r="${puckR}" l="${puckL}" farge ="Gazebo/Orange"
+                  xyz="0 0 0" rpy="0 0 0" mass="0.03"/>
+
+  <link name="dummy">
+  </link>
+
+    <joint name="dummy_joint" type="fixed">
+		<parent link="dummy"/>
+		<child link="puck"/>
+		<origin xyz="0 0 0" />
+  </joint>
+</robot>
